@@ -1,13 +1,35 @@
 import React from 'react'
-import { StyleSheet, Text, View,Image,TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View,Image,TouchableOpacity,FlatList ,ScrollView} from 'react-native'
 import Colors from '../constant/Colors'
 import SearchFeild from '../components/SearchFeild'
 import { width,unit } from '../constant/ScreenDetails';
 import Icon from 'react-native-vector-icons/Ionicons';
+import store from '../Store';
+import { set } from 'mobx';
+import { observer } from 'mobx-react-lite';
 
-export default function Home(props) {
+ function Home(props) {
     const [searchText , setSearchText] = React.useState('');
     const [isFullBody , setIsFullBody] = React.useState(false);
+    const [today, setToday] = React.useState(todayDate());
+    const [tomorrow, settomorrow] = React.useState(tomorrowDate());
+    function todayDate() {
+        const tempdate = new Date();
+        let date = tempdate.getDate() < 10 ? ('0' + tempdate.getDate()) : tempdate.getDate();
+        let month = (tempdate.getMonth() + 1) < 10 ? ('0' + (tempdate.getMonth() + 1)) : (tempdate.getMonth() + 1);
+        let year = tempdate.getFullYear();
+        return (year + '-' + month + '-' + date);
+    }
+    function tomorrowDate() {
+        let tempdate = new Date();
+        let date = (tempdate.getDate()+1)< 10 ? ('0' + (tempdate.getDate()+1)) : tempdate.getDate()+1;
+        let month = (tempdate.getMonth() + 1) < 10 ? ('0' + (tempdate.getMonth() + 1)) : (tempdate.getMonth() + 1);
+        let year = tempdate.getFullYear();
+        return (year + '-' + month + '-' + date);
+    }
+    React.useEffect(() => {
+        //setDetails(store);
+    },[]);
 
     function onChangeSearchText(text){
         setSearchText(text);
@@ -17,18 +39,19 @@ export default function Home(props) {
         }
     }
     function onAdd(){
-        props.navigation.navigate('Add',{userName:"ss"});
+        props.navigation.navigate('Add',{isedit:false,item:{}});
     }
-    function onPressItem(){
-        props.navigation.navigate('ShowDetails',{userName:"ss"});
+    function onPressItem(item){
+        props.navigation.navigate('ShowDetails',item={item});
     }
     
     return (
         <View style={styles.container}>
+
             <View style={styles.header}>
                 <View>
                     <Text style={styles.hello}>Hello!</Text>
-                    <Text style={styles.userName}>Deep Dharasandiya</Text>
+                    <Text style={styles.userName}>{store.userName}</Text>
                 </View>
                 <Image
                     style={styles.icon}
@@ -52,24 +75,34 @@ export default function Home(props) {
             {
                 !isFullBody && (
                     <View style={styles.cardView}>
+                    <ScrollView 
+                      horizontal={true}
+                      >
                     <Card
-                        due="Today"
-                        task={10}
-                        complete={4}
+                        due="Late"
+                        task={store.lateTask}
+                        complete={store.lateCompleteTask}
                         color={Colors.lightred}
                     />
                     <Card
+                        due="Today"
+                        task={store.todayTask}
+                        complete={store.todayCompleteTask}
+                        color={Colors.lightgreen}
+                    />
+                    <Card
                         due="Tommorow"
-                        task={10}
-                        complete={4}
+                        task={store.tommorowTask}
+                        complete={store.tommorowCompleteTask}
                         color={Colors.lightblue}
                     />
                     <Card
-                        due="This Week"
-                        task={10}
-                        complete={4}
+                        due="UpComming"
+                        task={store.upcomingTask}
+                        complete={store.upcomingComleteTask}
                         color={Colors.lightyellow}
                     />
+                </ScrollView>
                 </View>
                 )
             }
@@ -85,37 +118,61 @@ export default function Home(props) {
                     />
                 </TouchableOpacity>
                 
-                <Text style={styles.cardTitle}>Todo List (10)</Text>
-                <View >
-                    <TouchableOpacity
-                      style={styles.itemView}
-                      onPress={() => onPressItem()}>
-                        <View>
-                            <View style={{flexDirection:'row'}}>
-                                <Icon
-                                        name="albums"
-                                        color={Colors.lightred}
-                                        size={20* unit}
+                <Text style={styles.cardTitle}>{"Todo List (" + (store.todoList).filter((item) => ((item.title).toLowerCase()).includes(searchText.toLowerCase())).length+")"}</Text>
+                <View style={{marginBottom:25*unit}}>
+                    <FlatList
+                        key={1}
+                        data={(store.todoList).filter((item) => ((item.title).toLowerCase()).includes(searchText.toLowerCase()))}
+                        listMode="SCROLLVIEW"
+                        keyExtractor={(item, index) => `key-${index}`}
+                        renderItem={({index, item }) => {
+                            return <TouchableOpacity
+                                style={{...styles.itemView,
+                                    borderColor: today == item.endDate ? Colors.lightgreen
+                                        :
+                                        tomorrow == item.endDate ? Colors.lightblue
+                                            :
+                                            today < item.endDate ? Colors.lightyellow : Colors.lightred,
+                                  }}
+                                onPress={() => onPressItem(item)}>
+                                <View>
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <Icon
+                                            name="albums"
+                                            color={today == item.endDate ? Colors.lightgreen 
+                                                : 
+                                                tomorrow == item.endDate ? Colors.lightblue 
+                                                : 
+                                                today < item.endDate?Colors.lightyellow:Colors.lightred}
+                                            size={20 * unit}
+                                        />
+                                        <Text style={styles.titleText}>{item.title}</Text>
+                                    </View>
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <Icon
+                                            name="albums"
+                                            color={today == item.endDate ? Colors.lightgreen
+                                                :
+                                                tomorrow == item.endDate ? Colors.lightblue
+                                                    :
+                                                    today < item.endDate ? Colors.lightyellow : Colors.lightred}
+                                            size={20 * unit}
+                                            size={20 * unit}
+                                        />
+                                        <Text style={styles.dueText}>By {item.endDate}</Text>
+                                    </View>
+                                </View>
+                                <View>
+                                    <Icon
+                                        name={item.status ?"md-checkmark-circle-sharp":"md-close-circle"}
+                                        color={item.status?"green":'red'}
+                                        size={25 * unit}
                                     />
-                                <Text style={styles.titleText}>  Work</Text>
-                            </View>
-                            <View style={{flexDirection:'row'}}>
-                                <Icon
-                                        name="albums"
-                                        color={Colors.lightred}
-                                        size={20* unit}
-                                    />
-                                <Text style={styles.dueText}>  By Today</Text>
-                            </View>
-                        </View>
-                        <View>
-                        <Icon
-                            name="md-checkmark-circle-sharp"
-                            color={"green"}
-                            size={25* unit}
-                        />
-                        </View>
-                    </TouchableOpacity>
+                                </View>
+                            </TouchableOpacity>
+                        }}
+                    />
+                   
                 </View>
             </View>
             <TouchableOpacity 
@@ -130,7 +187,7 @@ export default function Home(props) {
         </View>
     )
 }
-
+export default observer(Home);
 const styles = StyleSheet.create({
     container:{
         flex:1,
@@ -164,7 +221,7 @@ const styles = StyleSheet.create({
         fontSize:20 * unit,
     },
     cardView:{
-        flexDirection:'row',
+        marginRight:20*unit,
     },
     Card:{
         marginLeft:20 * unit,
@@ -207,23 +264,24 @@ const styles = StyleSheet.create({
         justifyContent:'space-between',
         alignItems:'center',
         borderBottomWidth:2* unit,
-        borderColor:Colors.lightred,
         padding:10* unit
     },
     titleText:{
         color:Colors.black,
         fontSize:17* unit,
-        fontWeight:'500'
+        fontWeight:'500',
+        marginLeft:10*unit,
     },
     dueText:{
         color:Colors.black,
         fontSize:15* unit,
-        fontWeight:'500'
+        fontWeight:'500',
+         marginLeft: 10 * unit,
     },
     addButton:{
         position:'absolute',
-        bottom:10* unit,
-        right:10* unit
+        bottom:5* unit,
+        right:(width/2)-15*unit,
     }
 
 })

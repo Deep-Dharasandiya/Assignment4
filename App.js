@@ -1,6 +1,9 @@
 import React from 'react'
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
+import Loader from './src/components/Loader';
+import { observer } from 'mobx-react-lite';
+import Aleart from './src/components/Aleart';
 import { createStackNavigator } from '@react-navigation/stack';
 const Stack = createStackNavigator();
 
@@ -8,14 +11,22 @@ import InitialScreen from './src/screens/InitialScreen';
 import Home from './src/screens/Home';
 import Add from './src/screens/Add';
 import ShowDetails from './src/screens/ShowDetails';
+import store from './src/Store';
 
-export default function App() {
+ function App() {
  
 
 
   return (
     <SafeAreaProvider>
        <NavigationContainer>
+         {console.log(store.isLoading)}
+        <Loader
+          isVisible={store.isLoading}
+        />
+        <Aleart
+           isVisible={store.isAleart}
+        />
           <Stack.Navigator>
               <Stack.Screen name="InitialScreen" component={InitialScreen} options={{headerShown: false}}/>
               <Stack.Screen name="Home" component={Home} options={{headerShown: false}}/>
@@ -27,3 +38,5 @@ export default function App() {
     </SafeAreaProvider>
   )
 }
+
+export default observer(App)

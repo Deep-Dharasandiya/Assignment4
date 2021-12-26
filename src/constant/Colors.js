@@ -7,7 +7,8 @@ const Colors={
     lightyellow:'#FFCC00',
     blackshadow:'#171717',
     black:'black',
-    gray:'gray'
+    gray:'gray',
+    lightgreen:'#5DBB63',
 
 }
 export default Colors;

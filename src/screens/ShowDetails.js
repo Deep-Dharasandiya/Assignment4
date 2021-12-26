@@ -1,18 +1,34 @@
 import React from 'react'
-import { StyleSheet, Text, View,Switch } from 'react-native'
+import { StyleSheet, Text, View,Switch,TouchableOpacity } from 'react-native'
 import Colors from '../constant/Colors'
 import { width,height,unit } from '../constant/ScreenDetails';
 import Icon from 'react-native-vector-icons/Ionicons';
+import store from '../Store';
+import { observer } from 'mobx-react-lite';
 
-export default function ShowDetails() {
-    const [status , setStatus] = React.useState(false);
+function ShowDetails(props) {
+    const [item, setItem] = React.useState(props.route.params.item);
+    const [status, setStatus] = React.useState(item.status);
     function onChangeStatus(){
+        const obj={...item};
+        obj.status=!status;
+        const flag = store.insertTodoItem(obj);
         setStatus(!status);
+    }
+
+    function onEdit(index){
+        props.navigation.navigate('Add', { isedit: true, item: item });
+    }
+    function onDelete(item){
+      const flag= store.deleteTodoItem(item);
+      if(flag){
+          props.navigation.pop();
+      }
     }
     return (
         <View style={styles.container}>
             <View style={styles.card}>
-              <Text style={styles.header}>Title</Text>
+              <Text style={styles.header}>{item.title}</Text>
               <View style={styles.status}>
                 <Text style={styles.subHeader}>status:</Text>
                 <Switch
@@ -29,7 +45,7 @@ export default function ShowDetails() {
                     color={Colors.lightblue}
                     size={25}
                 />
-                 <Text style={styles.descriptionText}>status djfg fnjhg gbnjb gjknbhnjbntu ijgth8ht thuhh tijyjhjhyi6 </Text>
+                 <Text style={styles.descriptionText}>{item.description}</Text>
               </View>
               <View style={styles.descriptionView}>
                  <Icon
@@ -37,7 +53,7 @@ export default function ShowDetails() {
                     color={Colors.lightblue}
                     size={25}
                 />
-                 <Text style={styles.descriptionText}>2021-12-22 : 2021-12-25 </Text>
+                 <Text style={styles.descriptionText}>{item.startDate +" : "+item.endDate} </Text>
               </View>
               <View style={styles.descriptionView}>
                  <Icon
@@ -45,7 +61,7 @@ export default function ShowDetails() {
                     color={Colors.lightblue}
                     size={25}
                 />
-                 <Text style={styles.descriptionText}>Created By 2021-11-30 </Text>
+                    <Text style={styles.descriptionText}>{"Created By "+item.createdDate}</Text>
               </View>
               <View style={styles.descriptionView}>
                  <Icon
@@ -53,26 +69,33 @@ export default function ShowDetails() {
                     color={Colors.lightblue}
                     size={25}
                 />
-                 <Text style={styles.descriptionText}>Updateted By 2021-11-30 </Text>
+                    <Text style={styles.descriptionText}>{"Updated By " + item.updatedDate} </Text>
               </View>
               <View style={{...styles.descriptionView,justifyContent:'space-around'}}>
-                 <Icon
-                    name= {"ios-trash"}
-                    color={Colors.lightred}
-                    size={30}
-                />
-                 <Icon
-                    name= {"ios-reload-circle-sharp"}
-                    color={Colors.black}
-                    size={30}
-                />
+                <TouchableOpacity
+                    onPress={() => onDelete({...item})}>
+                    <Icon
+                        name= {"ios-trash"}
+                        color={Colors.lightred}
+                        size={30}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity
+                        onPress={() => onEdit({...item})}>
+                    <Icon
+                        name= {"ios-reload-circle-sharp"}
+                        color={Colors.black}
+                        size={30}
+                    />
+                </TouchableOpacity>
               </View>
               <View style={{height:2,backgroundColor:Colors.black,marginVertical:10,}}/>
-              <Text style={{...styles.descriptionText,textAlign:'right'}}>By 2021-02-23</Text>
+              <Text style={{...styles.descriptionText,textAlign:'right'}}>{"By "+ item.endDate}</Text>
             </View>
         </View>
     )
 }
+export default observer(ShowDetails);
 
 const styles = StyleSheet.create({
     container:{

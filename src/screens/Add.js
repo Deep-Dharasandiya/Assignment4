@@ -5,14 +5,18 @@ import { width,height,unit } from '../constant/ScreenDetails';
 import TextField from '../components/TextFeild';
 import SubmitButton from '../components/SubmitButton';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { observer } from 'mobx-react-lite';
+import store from '../Store';
 
-export default function Add() {
-    const [ title , setTitle] = React.useState('');
-    const [ description , setDescription] = React.useState('');
+ function Add(props) {
+    const isedit=props.route.params.isedit;
+    const item = props.route.params.item;
+    const [ title , setTitle] = React.useState(isedit?item.title:'');
+    const [description, setDescription] = React.useState(isedit ?item.description: '');
 
 
-    const [startDateText, setStartDateText] = React.useState('Select');
-    const [endDateText, setEndDateText] = React.useState('Select');
+    const [startDateText, setStartDateText] = React.useState(isedit ?item.startDate:'Select');
+    const [endDateText, setEndDateText] = React.useState(isedit ? item.endDate: 'Select');
     const [startDate, setStartDate] = React.useState(new Date());
     const [endDate, setEndDate] = React.useState(new Date());
     const [showStartDate, setShowStartDate] = React.useState(false);
@@ -24,8 +28,8 @@ export default function Add() {
         setShowStartDate(Platform.OS === 'ios');
         if(event.type=="set"){
             const tempdate=new Date(selectedDate);
-                let date = tempdate.getDate();
-                let month = tempdate.getMonth() + 1;
+                let date = tempdate.getDate() < 10 ? ('0' + tempdate.getDate()) : tempdate.getDate();
+                let month = (tempdate.getMonth() + 1) < 10 ? ('0' + (tempdate.getMonth() + 1)) : (tempdate.getMonth() + 1);
                 let year = tempdate.getFullYear();
             setStartDateText(year + '-' + month + '-' + date);
 
@@ -37,13 +41,20 @@ export default function Add() {
         setShowEndDate(Platform.OS === 'ios');
         if(event.type=="set"){
             const tempdate=new Date(selectedDate);
-            let date = tempdate.getDate();
-            let month = tempdate.getMonth() + 1;
+            let date = tempdate.getDate() < 10 ? ('0' + tempdate.getDate()) : tempdate.getDate();
+            let month = (tempdate.getMonth() + 1) < 10 ? ('0' + (tempdate.getMonth() + 1)) : (tempdate.getMonth() + 1);
             let year = tempdate.getFullYear();
             setEndDateText(year + '-' + month + '-' + date);
         }   
         
     };
+    function currentDate(){
+        const tempdate =new Date();
+        let date = tempdate.getDate() < 10 ? ('0' + tempdate.getDate()) : tempdate.getDate();
+        let month = (tempdate.getMonth() + 1) < 10 ? ('0' + (tempdate.getMonth() + 1)) : (tempdate.getMonth() + 1);
+        let year = tempdate.getFullYear();
+        return (year + '-' + month + '-' + date);
+    }
     const showDatepickerStartDate = () => {
         setShowStartDate(true);
     };
@@ -61,6 +72,27 @@ export default function Add() {
         setDescription(text);
     }
     function onSubmit(){
+        if (title != '' && description != '' && startDateText != 'Select' && endDateText != 'Select'){
+            const Item = {
+                id: isedit ? item.id : (title + String(Date())),
+                title: title,
+                description: description,
+                startDate: startDateText,
+                endDate: endDateText,
+                createdDate: isedit ? item.createdDate : currentDate(),
+                updatedDate: currentDate(),
+                status: isedit ? item.status : false,
+            }
+            const flag = store.insertTodoItem(Item);
+            if (flag) {
+                props.navigation.pop();
+                isedit ? props.navigation.pop() : null;
+            } else {
+                store.setAleart("Details not set");
+            }
+        }else{
+            store.setAleart("Please Enter all the Details");
+        }
         //props.navigation.navigate('Home',{userName:userName});
     }
 
@@ -142,6 +174,7 @@ export default function Add() {
         </View>
     )
 }
+export default observer(Add);
 
 const styles = StyleSheet.create({
     container:{

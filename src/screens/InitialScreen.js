@@ -5,20 +5,41 @@ import SplashScreen from 'react-native-splash-screen';
 import TextField from '../components/TextFeild';
 import SubmitButton from '../components/SubmitButton';
 import {unit } from '../constant/ScreenDetails';
+import store from '../Store';
+import { Observer } from 'mobx-react-lite';
+import { array } from 'mobx-state-tree/dist/internal';
+import data from '../data';
+import Loader from '../components/Loader';
+
 
 export default function InitialScreen(props) {
     const [userName , setUserName] = React.useState('');
+
     React.useEffect(() => {
         SplashScreen.hide();
     }, []);
+
     function onChangeUserName(text){
         setUserName(text);
     }
-    function onSubmit(){
-        props.navigation.navigate('Home',{userName:userName});
+     async function onSubmit(){
+         if(userName != ''){
+             const flag = store.insertUser(userName);
+             if (flag) {
+                 props.navigation.navigate('Home', { userName: userName });
+             } else {
+                 alert("error");
+             }
+         }else{
+             store.setAleart("Please enter userName first");
+         }
+        
+        
     }
     return (
         <View style={styles.container}>
+            {console.log("dfgrrg : " +store.isLoading)}
+        
             <Image
               style={styles.icon}
               resizeMode="contain"
