@@ -73,22 +73,26 @@ import store from '../Store';
     }
     function onSubmit(){
         if (title != '' && description != '' && startDateText != 'Select' && endDateText != 'Select'){
-            const Item = {
-                id: isedit ? item.id : (title + String(Date())),
-                title: title,
-                description: description,
-                startDate: startDateText,
-                endDate: endDateText,
-                createdDate: isedit ? item.createdDate : currentDate(),
-                updatedDate: currentDate(),
-                status: isedit ? item.status : false,
-            }
-            const flag = store.insertTodoItem(Item);
-            if (flag) {
-                props.navigation.pop();
-                isedit ? props.navigation.pop() : null;
-            } else {
-                store.setAleart("Details not set");
+            if(startDateText<endDateText){
+                const Item = {
+                    id: isedit ? item.id : (title + String(Date())),
+                    title: title,
+                    description: description,
+                    startDate: startDateText,
+                    endDate: endDateText,
+                    createdDate: isedit ? item.createdDate : currentDate(),
+                    updatedDate: currentDate(),
+                    status: isedit ? item.status : false,
+                }
+                const flag = store.insertTodoItem(Item);
+                if (flag) {
+                    props.navigation.pop();
+                    isedit ? props.navigation.pop() : null;
+                } else {
+                    store.setAleart("Details not set");
+                }
+            }else{
+                store.setAleart("Please Enter valid date");
             }
         }else{
             store.setAleart("Please Enter all the Details");

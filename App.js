@@ -20,7 +20,6 @@ import store from './src/Store';
   return (
     <SafeAreaProvider>
        <NavigationContainer>
-         {console.log(store.isLoading)}
         <Loader
           isVisible={store.isLoading}
         />

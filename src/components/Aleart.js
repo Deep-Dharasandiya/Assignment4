@@ -11,7 +11,7 @@ function Aleart(props) {
            width: width*0.9,
            marginVertical:20 * unit,
            backgroundColor:Colors.white,
-           borderColor:Colors.lightblue,
+           borderColor:Colors.lightred,
            borderWidth:2,
            borderRadius:10*unit,
            shadowColor: Colors.lightblue,
@@ -22,6 +22,15 @@ function Aleart(props) {
             justifyContent:'center',
            alignItems:'center',
           },
+          ok:{
+              width: 60, 
+              backgroundColor: Colors.lightred, 
+              padding: 5 * unit, 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              borderRadius: 5, 
+              marginVertical: 10
+          }
     })
     return (
         <Modal
@@ -39,8 +48,8 @@ function Aleart(props) {
                 >
                 <View style={styles.container}>
                     <Text style={{fontSize:18*unit,marginTop:10}}>{store.aleartMessage}</Text>
-                    <View style={{width:60,backgroundColor:Colors.blurblue,padding:5 *unit,alignItems:'center',justifyContent:'center',borderRadius:5,marginVertical:10}}>
-                        <Text style={{color:Colors.lightblue,fontWeight:'600'}}>OK</Text>
+                    <View style={styles.ok}>
+                        <Text style={{color:Colors.white,fontWeight:'600'}}>OK</Text>
                         </View>
 
                 </View>

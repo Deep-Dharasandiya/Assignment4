@@ -22,7 +22,8 @@ import { observer } from 'mobx-react-lite';
     }
     function tomorrowDate() {
         let tempdate = new Date();
-        let date = (tempdate.getDate()+1)< 10 ? ('0' + (tempdate.getDate()+1)) : tempdate.getDate()+1;
+        tempdate.setDate(tempdate.getDate() + 1);
+        let date = (tempdate.getDate())< 10 ? ('0' + (tempdate.getDate())) : tempdate.getDate();
         let month = (tempdate.getMonth() + 1) < 10 ? ('0' + (tempdate.getMonth() + 1)) : (tempdate.getMonth() + 1);
         let year = tempdate.getFullYear();
         return (year + '-' + month + '-' + date);

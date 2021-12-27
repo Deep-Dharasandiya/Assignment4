@@ -38,8 +38,6 @@ export default function InitialScreen(props) {
     }
     return (
         <View style={styles.container}>
-            {console.log("dfgrrg : " +store.isLoading)}
-        
             <Image
               style={styles.icon}
               resizeMode="contain"
